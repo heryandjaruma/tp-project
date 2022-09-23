@@ -1,0 +1,1 @@
+path_to_project_fold = r'D:\TPProject\init_main'
