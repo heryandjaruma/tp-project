@@ -11,3 +11,5 @@ def go_to_audio_entities_dev():
     os.chdir(path_to_project_fold+r'\audio_entity_dev')
 def go_to_mix_dev():
     os.chdir(path_to_project_fold+r'\mix_dev')
+def got_to_history_dev():
+    os.chdir(path_to_project_fold+r'\history_dev')

@@ -20,7 +20,6 @@ class AudioEntity:
         self.entity_num = entity_num
         # self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(self.time_start), '%03d' % int(entity_num + 1)]) + '.wav'
         self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(entity_num + 1)]) + '.wav'
-
         self.set_pandas_metadata()
     
     def get_origin(self):
@@ -43,6 +42,8 @@ class AudioEntity:
         return self.ov
     def get_naming(self):
         return self.naming
+    def get__class(self):
+        return self._class
     
     def set_pandas_metadata(self):
         go_to_metadata_dir()
@@ -68,7 +69,6 @@ class AudioEntity:
         self.frame_rate = self.entity.frame_rate
         self.sample_width = self.entity.sample_width
         self.set_channels = 2
-
         # print(f'time_start:{self.time_start} | time_end:{self.time_end}')
         go_to_project_dir()
     

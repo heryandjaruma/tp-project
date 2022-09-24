@@ -25,14 +25,10 @@ dict = [
 class OvEntity:
     def __init__(self, csv_filename:str) -> None:
         self.csv_filename = csv_filename
-        
         self.foa = self.csv_filename[:-4]+r'.wav'
 
-        # read metadata
-        self.set_pandas_metadata()
-
-        # creating audio entities
-        self.set_audio_entitites()
+        self.set_pandas_metadata()        # read metadata
+        self.set_audio_entitites()        # creating audio entities
     
     def go_to_metadata_dir(self):
         os.chdir(path_to_project_fold+r'\metadata_dev')
@@ -72,7 +68,6 @@ class OvEntity:
         return self.AudioEntities
     def set_audio_entitites(self):
         # TODO: process ov entity into audio entities
-        # self.AudioEntities = AudioEntity(self.project_path, self.csv_filename)
         self.count_entities = 0
         self.AudioEntities = []
 

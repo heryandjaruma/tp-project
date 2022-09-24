@@ -1,3 +1,4 @@
+from email import header
 from turtle import position
 from classes.OvEntity import OvEntity
 from pydub import AudioSegment
@@ -8,59 +9,19 @@ from env import *
 import numpy as np
 import pandas as pd
 
-# # TODO: combine 2 audio entities
-# def overlay(oe1:OvEntity, oe2:OvEntity, testing=True):
-#     # overlap_csv(entity1, entity2)
-
-
-#     oe1_aes = oe1.audio_entities()
-#     oe2_aes = oe2.audio_entities()
-#     go_to_foa_dir()                                 # go to foa
-
-#     #* testing=True means only one main audio will be processed
-#     if testing == True:
-#         audio_main = AudioSegment.from_file(oe1.get_foa())
-#         audio_main = audio_main.split_to_mono()
-#         audio_main = audio_main[0]
-#         go_to_project_dir()                         # go to project
-        
-#         count = 1
-#         for entity2_ae in oe2_aes:
-#             go_to_audio_entities_dev()              # go to audio entity
-#             audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
-#             overlayed = audio_main.overlay(audio_particle, position = oe1_aes[0].get_time_start()*100)
-
-#             go_to_mix_dev()                         # go to mix_dev
-#             overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
-#             count = count + 1
-#     else:
-#         count = 1
-#         for entity1_index, entity1_ae in enumerate(entity1_aes):
-#             audio_main = AudioSegment.from_file(entity1.get_foa())
-#             audio_main = audio_main.split_to_mono()
-#             audio_main = audio_main[0]
-#             go_to_project_dir()                     # go to project
-#             for entity2_ae in entity2_aes:
-#                 go_to_audio_entities_dev()
-#                 audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
-
-#                 #! TODO : do overlay algorithm here
-#                 overlayed = audio_main.overlay(audio_particle, position=entity1_aes[entity1_index].get_time_start()*100)
-#                 go_to_mix_dev()                     # go to mix_dev
-#                 overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
-#                 count = count + 1
-    
-#     go_to_project_dir()                             # go to project
-#     print("All process done...")
-
 def do_overlay(oe1:OvEntity, oe2:OvEntity):
+    # pd.set_option('display.max_rows',None)        # IF wanna see all row
+
+    history = pd.DataFrame()
+
     oe1_aes = oe1.audio_entities()
     oe2_aes = oe2.audio_entities()
 
     # tell possible combination
-    print(f'There will be {oe1.get_count_entities()*oe2.get_count_entities()} possible combinations')
+    print(f'There will be {oe1.get_count_entities()*oe2.get_count_entities()} possible combinations.\nStart processing...')
 
     # loop for each oe1_aes
+    file_count_process = 1
     inc_ori = 1
     for oe1_ae in oe1_aes:
         ori_df = oe1.get_df()   # get oe1's df
@@ -77,6 +38,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
         inc_particle = 1
         for iter_num, oe2_ae in enumerate(oe2_aes):
+            print(f"Processing #{file_count_process} entity...")
             # print('========================================================== Loop -', iter_num,'\n')
 
             particle_df = oe2_ae.get_df()   # get oe2's df
@@ -95,39 +57,20 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             ori_df = ori_df.set_index('Frm')            # use frm as index
 
             df_ori_init = ori_df.loc[:ae1_start-1,:]             # will have a value if not the first iteration
-            # print('cut start :', ae1_start)
             df_ori_main = ori_df.loc[ae1_start:ae1_end,:]            # main part
             df_ori_left = ori_df.loc[ae1_end+1:,:]             # will not have a value if the last iteration
-            # print('cut end :', ae1_end)
-            # print("INIT")
-            # print(df_ori_init)
-            # print("ORI")
-            # print(df_ori_main)
-            # print("LEFT")
-            # print(df_ori_left)
-
 
             df_ori_main = df_ori_main.reset_index()            # reset set index only for main part
-            # particle_df = particle_df.set_index('Frm')
-
-
             df_combined = pd.DataFrame()            # initiate new df
-
             df_combined = pd.concat([df_ori_init])            # append init to the new df
-            # print("COMBINED")
-            # print(df_combined)
 
-            # pd.set_option('display.max_rows',None)
 
             df1 = df_ori_main
             df2 = particle_df
 
             df1['unique_id'] = np.arange(0, df1.shape[0]*2,2)
             df2['unique_id'] = np.arange(1, df2.shape[0]*2,2)
-
-            # ! START OVERLAY AUDIO
             
-
             if ae1_duration < ae2_duration:
                 df2['Frm'] = df1['Frm']
                 particle_audio = particle_audio[:ae1_duration*100]
@@ -163,13 +106,27 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             go_to_project_dir()
 
 
+            # ADD HISTORY to dataframe
+            # * ask : history tuh buat track semua file atau misah" aja per file?
+            row_history = np.array([
+                # file1, file2, class1, class2, file_output
+                oe1.get_csv_filename(), oe2.get_csv_filename(), oe1_ae.get__class(), oe2_ae.get__class(), export_name
+            ])
+            history_df = pd.DataFrame(row_history.reshape(1,-1))
+            history = pd.concat([history, history_df])            # append to df
 
-            # print(df_combined)
-            # print('==========================================================\n')
-            # input()
             inc_particle = inc_particle + 1
+            file_count_process = file_count_process + 1
         inc_ori = inc_ori + 1
-            
+    
+    # EXPORT HISTORY
+    oe1_filename = oe1.get_csv_filename()
+    oe2_filename = oe2.get_csv_filename()
+    export_history_name = oe1_filename[:-4] + '_OVERLAP_' + oe2_filename[:-4] + '.csv'
+    got_to_history_dev()
+    history.to_csv(export_history_name, header=False, index=False)
+    go_to_project_dir()
+    print("Done Processing...")
         
 
 
@@ -204,7 +161,7 @@ if __name__ == '__main__':
     for item in os.listdir():
         if 'ov2' not in item:
             oes.append(OvEntity(item))
-            export_audio_entities(oes[-1])
+            # export_audio_entities(oes[-1])
 
     go_to_project_dir()                             # go to project
     
@@ -217,4 +174,4 @@ if __name__ == '__main__':
     # aes = oe.audio_entities()
     # ae = aes[0]
     # print(ae.get_df(), ae.get_origin())
-    # do_overlay(oes[0], oes[5])
+    do_overlay(oes[0], oes[5])
