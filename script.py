@@ -66,6 +66,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
         ori_df = oe1.get_df()   # get oe1's df
         go_to_foa_dir()
         ori_audio = AudioSegment.from_file(oe1.get_foa())   # get oe1's original audio
+        go_to_project_dir()             # go to project
+        ori_audio = ori_audio.split_to_mono()
+        ori_audio = ori_audio[0]
 
         # get start, end, duration for oe1
         ae1_start = oe1_ae.get_time_start()
@@ -76,26 +79,25 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
         for iter_num, oe2_ae in enumerate(oe2_aes):
             # print('========================================================== Loop -', iter_num,'\n')
 
-            go_to_project_dir()             # go to project
-            go_to_audio_entities_dev()      # go to audio entities
             particle_df = oe2_ae.get_df()   # get oe2's df
+            go_to_audio_entities_dev()      # go to audio entities
             particle_audio = AudioSegment.from_file(oe2_ae.get_naming())   # get oe2's particle audio
-            go_to_project_dir()             # go to project
+            go_to_project_dir()
+
+            
 
             # get start, end, duration for oe2
             ae2_start = oe2_ae.get_time_start()
             ae2_end = oe2_ae.get_time_end()
             ae2_duration = ae2_end-ae2_start
 
-            # use frm as index
-            ori_df = ori_df.set_index('Frm')
-            # will have a value if not the first iteration
-            df_ori_init = ori_df.loc[:ae1_start-1,:]
+
+            ori_df = ori_df.set_index('Frm')            # use frm as index
+
+            df_ori_init = ori_df.loc[:ae1_start-1,:]             # will have a value if not the first iteration
             # print('cut start :', ae1_start)
-            # main part
-            df_ori_main = ori_df.loc[ae1_start:ae1_end,:]
-            # will not have a value if the last iteration
-            df_ori_left = ori_df.loc[ae1_end+1:,:]
+            df_ori_main = ori_df.loc[ae1_start:ae1_end,:]            # main part
+            df_ori_left = ori_df.loc[ae1_end+1:,:]             # will not have a value if the last iteration
             # print('cut end :', ae1_end)
             # print("INIT")
             # print(df_ori_init)
@@ -104,14 +106,14 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             # print("LEFT")
             # print(df_ori_left)
 
-            # reset set index only for main part
-            df_ori_main = df_ori_main.reset_index()
+
+            df_ori_main = df_ori_main.reset_index()            # reset set index only for main part
             # particle_df = particle_df.set_index('Frm')
 
-            # initiate new df
-            df_combined = pd.DataFrame()
-            # append init to the new df
-            df_combined = pd.concat([df_ori_init])
+
+            df_combined = pd.DataFrame()            # initiate new df
+
+            df_combined = pd.concat([df_ori_init])            # append init to the new df
             # print("COMBINED")
             # print(df_combined)
 
@@ -123,14 +125,17 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             df1['unique_id'] = np.arange(0, df1.shape[0]*2,2)
             df2['unique_id'] = np.arange(1, df2.shape[0]*2,2)
 
+            # ! START OVERLAY AUDIO
+            
+
             if ae1_duration < ae2_duration:
                 df2['Frm'] = df1['Frm']
+                particle_audio = particle_audio[:ae1_duration*100]
             else:
                 df2['Frm'] = df1['Frm'].iloc[:ae1_duration]
 
 
             new_df = pd.concat([df1,df2])
-        
             new_df = new_df.sort_values(by=['unique_id'])
             # print(new_df)
             new_df = new_df.drop(columns='unique_id')
@@ -141,22 +146,28 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
             df_combined = pd.concat([df_combined, new_df])
             df_combined = pd.concat([df_combined, df_ori_left])
-            # reset so index became int again
-            ori_df = ori_df.reset_index()
-            go_to_project_dir()
-            go_to_metadata_dir()
 
+            ori_df = ori_df.reset_index()            # reset so index became int again
+
+            # EXPORT CSV
             export_name = oe1.get_csv_filename().replace('ov1', 'ov2_%03d_%03d' % (inc_ori, inc_particle))
-            inc_particle = inc_particle + 1
-
-            # export to csv
+            go_to_metadata_dir()
             df_combined.to_csv(export_name,header=False)
-
             go_to_project_dir()
+
+
+            # EXPORT AUDIO
+            overlayed = ori_audio.overlay(particle_audio, position=ae1_start*100)
+            go_to_mix_dev()
+            overlayed.export("_".join([oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), '%03d_%03d' % (inc_ori, inc_particle)]) + '.wav')
+            go_to_project_dir()
+
+
 
             # print(df_combined)
             # print('==========================================================\n')
             # input()
+            inc_particle = inc_particle + 1
         inc_ori = inc_ori + 1
             
         
@@ -193,7 +204,7 @@ if __name__ == '__main__':
     for item in os.listdir():
         if 'ov2' not in item:
             oes.append(OvEntity(item))
-            # export_audio_entities(oes[-1])
+            export_audio_entities(oes[-1])
 
     go_to_project_dir()                             # go to project
     
@@ -206,4 +217,4 @@ if __name__ == '__main__':
     # aes = oe.audio_entities()
     # ae = aes[0]
     # print(ae.get_df(), ae.get_origin())
-    do_overlay(oes[0], oes[5])
+    # do_overlay(oes[0], oes[5])

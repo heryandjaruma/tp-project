@@ -18,7 +18,8 @@ class AudioEntity:
         self.time_start = time_start
         self.time_end = time_end
         self.entity_num = entity_num
-        self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(self.time_start), '%03d' % int(entity_num + 1)]) + '.wav'
+        # self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(self.time_start), '%03d' % int(entity_num + 1)]) + '.wav'
+        self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(entity_num + 1)]) + '.wav'
 
         self.set_pandas_metadata()
     
