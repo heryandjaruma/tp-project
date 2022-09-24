@@ -45,11 +45,11 @@ class OvEntity:
 
     def set_pandas_metadata(self):
         go_to_metadata_dir()
-        self.pd = pd.read_csv(self.csv_filename, header=None)
-        self.pd.columns = ['Frm', 'Class', 'Track', 'Azmth', 'Elev']
+        self.df = pd.read_csv(self.csv_filename, header=None)
+        self.df.columns = ['Frm', 'Class', 'Track', 'Azmth', 'Elev']
         go_to_project_dir()
-    def get_pd(self):
-        return self.pd
+    def get_df(self):
+        return self.df
     
     def get_csv_filename(self):
         return self.csv_filename
@@ -76,11 +76,11 @@ class OvEntity:
         self.count_entities = 0
         self.AudioEntities = []
 
-        first_row = self.pd.iloc[0]
+        first_row = self.df.iloc[0]
         time_start = time_end = first_row['Frm']
         class_before = first_row['Class']
 
-        for index, row in self.pd.iterrows():
+        for index, row in self.df.iterrows():
             if class_before == row['Class']:
                 time_end = row['Frm']
                 continue

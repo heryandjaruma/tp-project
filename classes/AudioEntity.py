@@ -18,7 +18,7 @@ class AudioEntity:
         self.time_start = time_start
         self.time_end = time_end
         self.entity_num = entity_num
-        self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % self.time_start, '%03d' % (self.entity_num+1)]) + '.wav'
+        self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(self.time_start), '%03d' % int(entity_num + 1)]) + '.wav'
 
         self.set_pandas_metadata()
     
@@ -45,11 +45,15 @@ class AudioEntity:
     
     def set_pandas_metadata(self):
         go_to_metadata_dir()
-        self.pd = pd.read_csv(self.origin[:-3]+'csv', header=None, index_col=0)
-        self.pd = self.pd.loc[self.time_start:self.time_end,:]
+        # self.df = pd.read_csv(self.origin[:-3]+'csv', header=None,index_col=0)
+        self.df = pd.read_csv(self.origin[:-3]+'csv', header=None)
+        self.df.columns = ['Frm', 'Class', 'Track', 'Azmth', 'Elev']
+        self.df = self.df.set_index('Frm')
+        self.df = self.df.loc[self.time_start:self.time_end,:]
+        self.df = self.df.reset_index()
         go_to_project_dir()
-    def get_pd(self):
-        return self.pd
+    def get_df(self):
+        return self.df
     
     def create_me(self):
         go_to_foa_dir()

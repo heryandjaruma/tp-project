@@ -8,97 +8,159 @@ from env import *
 import numpy as np
 import pandas as pd
 
-# project path
-
-# # TODO: combine 2 csvs
-# def overlap_csv(e1:OvEntity, e2:OvEntity):
-#     e1_aes = e1.audio_entities()
-#     e2_aes = e2.audio_entities()
-
-#     df1 = e1.get_pd()
-#     df1 = df1.set_index('Frm')
-#     df2 = e2.get_pd()
-
-#     df_combined = pd.DataFrame()
-
-#     for e2_ae in e2_aes:
-#         target_timestamp = [e2_ae.get_time_start(), e2_ae.get_time_end()]
-        
-#         for e1_ae in e1_aes:
-#             start = e1_ae.get_time_start()
-#             end = e1_ae.get_time_end()
-#             if start!=target_timestamp[0] and end!=target_timestamp[1]:
-#                 pd_particle = df1.loc[start:end,:]
-#                 df_combined = pd.concat([df_combined, pd_particle])
-#             else:
-#                 print('asdf')
-#                 if (end-start) > (target_timestamp[1]-target_timestamp[0]):
-#                     for row in e2.get_pd().iterrows():
-#                         print(row)
-
-#     pd.set_option('display.max_rows',None)
-#     print(df_combined)
-    
-    
-
-
-#     # start = e1_aes[0].get_time_start()
-#     # end1 = e1_aes[0].get_time_end()
-#     # df1 = df1.loc[start:end1,:]
-#     # print(df1)
-
-
-#     go_to_metadata_dir()                            # go to metadata
-
-
-
-
-
 # # TODO: combine 2 audio entities
-# def overlay(entity1:OvEntity, entity2:OvEntity, testing=True):
+# def overlay(oe1:OvEntity, oe2:OvEntity, testing=True):
 #     # overlap_csv(entity1, entity2)
 
 
-#     # entity1_aes = entity1.audio_entities()
-#     # entity2_aes = entity2.audio_entities()
-#     # go_to_foa_dir()                                 # go to foa
+#     oe1_aes = oe1.audio_entities()
+#     oe2_aes = oe2.audio_entities()
+#     go_to_foa_dir()                                 # go to foa
 
-#     # #* testing=True means only one main audio will be processed
-#     # if testing == True:
-#     #     audio_main = AudioSegment.from_file(entity1.get_foa())
-#     #     audio_main = audio_main.split_to_mono()
-#     #     audio_main = audio_main[0]
-#     #     go_to_project_dir()                         # go to project
+#     #* testing=True means only one main audio will be processed
+#     if testing == True:
+#         audio_main = AudioSegment.from_file(oe1.get_foa())
+#         audio_main = audio_main.split_to_mono()
+#         audio_main = audio_main[0]
+#         go_to_project_dir()                         # go to project
         
-#     #     count = 1
-#     #     for entity2_ae in entity2_aes:
-#     #         go_to_audio_entities_dev()              # go to audio entity
-#     #         audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
-#     #         overlayed = audio_main.overlay(audio_particle, position = entity1_aes[0].get_time_start()*100)
+#         count = 1
+#         for entity2_ae in oe2_aes:
+#             go_to_audio_entities_dev()              # go to audio entity
+#             audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
+#             overlayed = audio_main.overlay(audio_particle, position = oe1_aes[0].get_time_start()*100)
 
-#     #         go_to_mix_dev()                         # go to mix_dev
-#     #         overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
-#     #         count = count + 1
-#     # else:
-#     #     count = 1
-#     #     for entity1_index, entity1_ae in enumerate(entity1_aes):
-#     #         audio_main = AudioSegment.from_file(entity1.get_foa())
-#     #         audio_main = audio_main.split_to_mono()
-#     #         audio_main = audio_main[0]
-#     #         go_to_project_dir()                     # go to project
-#     #         for entity2_ae in entity2_aes:
-#     #             go_to_audio_entities_dev()
-#     #             audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
+#             go_to_mix_dev()                         # go to mix_dev
+#             overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
+#             count = count + 1
+#     else:
+#         count = 1
+#         for entity1_index, entity1_ae in enumerate(entity1_aes):
+#             audio_main = AudioSegment.from_file(entity1.get_foa())
+#             audio_main = audio_main.split_to_mono()
+#             audio_main = audio_main[0]
+#             go_to_project_dir()                     # go to project
+#             for entity2_ae in entity2_aes:
+#                 go_to_audio_entities_dev()
+#                 audio_particle = AudioSegment.from_file(entity2_ae.get_naming())
 
-#     #             #! TODO : do overlay algorithm here
-#     #             overlayed = audio_main.overlay(audio_particle, position=entity1_aes[entity1_index].get_time_start()*100)
-#     #             go_to_mix_dev()                     # go to mix_dev
-#     #             overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
-#     #             count = count + 1
+#                 #! TODO : do overlay algorithm here
+#                 overlayed = audio_main.overlay(audio_particle, position=entity1_aes[entity1_index].get_time_start()*100)
+#                 go_to_mix_dev()                     # go to mix_dev
+#                 overlayed.export("_".join([entity2_ae.get_fold(), entity2_ae.get_room(), entity2_ae.get_mix(), 'ov2','%03d' % count]) + '.wav')
+#                 count = count + 1
     
-#     # go_to_project_dir()                             # go to project
-#     # print("All process done...")
-    
+#     go_to_project_dir()                             # go to project
+#     print("All process done...")
+
+def do_overlay(oe1:OvEntity, oe2:OvEntity):
+    oe1_aes = oe1.audio_entities()
+    oe2_aes = oe2.audio_entities()
+
+    # tell possible combination
+    print(f'There will be {oe1.get_count_entities()*oe2.get_count_entities()} possible combinations')
+
+    # loop for each oe1_aes
+    inc_ori = 1
+    for oe1_ae in oe1_aes:
+        ori_df = oe1.get_df()   # get oe1's df
+        go_to_foa_dir()
+        ori_audio = AudioSegment.from_file(oe1.get_foa())   # get oe1's original audio
+
+        # get start, end, duration for oe1
+        ae1_start = oe1_ae.get_time_start()
+        ae1_end = oe1_ae.get_time_end()
+        ae1_duration = ae1_end-ae1_start
+
+        inc_particle = 1
+        for iter_num, oe2_ae in enumerate(oe2_aes):
+            # print('========================================================== Loop -', iter_num,'\n')
+
+            go_to_project_dir()             # go to project
+            go_to_audio_entities_dev()      # go to audio entities
+            particle_df = oe2_ae.get_df()   # get oe2's df
+            particle_audio = AudioSegment.from_file(oe2_ae.get_naming())   # get oe2's particle audio
+            go_to_project_dir()             # go to project
+
+            # get start, end, duration for oe2
+            ae2_start = oe2_ae.get_time_start()
+            ae2_end = oe2_ae.get_time_end()
+            ae2_duration = ae2_end-ae2_start
+
+            # use frm as index
+            ori_df = ori_df.set_index('Frm')
+            # will have a value if not the first iteration
+            df_ori_init = ori_df.loc[:ae1_start-1,:]
+            # print('cut start :', ae1_start)
+            # main part
+            df_ori_main = ori_df.loc[ae1_start:ae1_end,:]
+            # will not have a value if the last iteration
+            df_ori_left = ori_df.loc[ae1_end+1:,:]
+            # print('cut end :', ae1_end)
+            # print("INIT")
+            # print(df_ori_init)
+            # print("ORI")
+            # print(df_ori_main)
+            # print("LEFT")
+            # print(df_ori_left)
+
+            # reset set index only for main part
+            df_ori_main = df_ori_main.reset_index()
+            # particle_df = particle_df.set_index('Frm')
+
+            # initiate new df
+            df_combined = pd.DataFrame()
+            # append init to the new df
+            df_combined = pd.concat([df_ori_init])
+            # print("COMBINED")
+            # print(df_combined)
+
+            # pd.set_option('display.max_rows',None)
+
+            df1 = df_ori_main
+            df2 = particle_df
+
+            df1['unique_id'] = np.arange(0, df1.shape[0]*2,2)
+            df2['unique_id'] = np.arange(1, df2.shape[0]*2,2)
+
+            if ae1_duration < ae2_duration:
+                df2['Frm'] = df1['Frm']
+            else:
+                df2['Frm'] = df1['Frm'].iloc[:ae1_duration]
+
+
+            new_df = pd.concat([df1,df2])
+        
+            new_df = new_df.sort_values(by=['unique_id'])
+            # print(new_df)
+            new_df = new_df.drop(columns='unique_id')
+            new_df = new_df.dropna()
+            new_df['Frm'] = new_df['Frm'].astype(int)
+            new_df = new_df.set_index('Frm')
+            # print(new_df)
+
+            df_combined = pd.concat([df_combined, new_df])
+            df_combined = pd.concat([df_combined, df_ori_left])
+            # reset so index became int again
+            ori_df = ori_df.reset_index()
+            go_to_project_dir()
+            go_to_metadata_dir()
+
+            export_name = oe1.get_csv_filename().replace('ov1', 'ov2_%03d_%03d' % (inc_ori, inc_particle))
+            inc_particle = inc_particle + 1
+
+            # export to csv
+            df_combined.to_csv(export_name,header=False)
+
+            go_to_project_dir()
+
+            # print(df_combined)
+            # print('==========================================================\n')
+            # input()
+        inc_ori = inc_ori + 1
+            
+        
+
 
 # TODO: export all Audio Entities in a specified Ov Entity
 def export_audio_entities(oe:OvEntity):
@@ -129,14 +191,19 @@ if __name__ == '__main__':
 
     # TODO: creating object for each file in \metadata_dev
     for item in os.listdir():
-        oes.append(OvEntity(item))
-        # export_audio_entities(oes[-1])
+        if 'ov2' not in item:
+            oes.append(OvEntity(item))
+            # export_audio_entities(oes[-1])
 
     go_to_project_dir()                             # go to project
     
     # check_all_objects(oes)
     # overlay(oes[0], oes[1])
-    oe = oes[1]
-    aes = oe.audio_entities()
-    ae = aes[0]
-    print(ae.get_pd())
+
+
+    # oe = oes[5]
+    # print(oe.get_df())
+    # aes = oe.audio_entities()
+    # ae = aes[0]
+    # print(ae.get_df(), ae.get_origin())
+    do_overlay(oes[0], oes[5])
