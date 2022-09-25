@@ -161,7 +161,7 @@ if __name__ == '__main__':
     for item in os.listdir():
         if 'ov2' not in item:
             oes.append(OvEntity(item))
-            # export_audio_entities(oes[-1])
+            export_audio_entities(oes[-1])
 
     go_to_project_dir()                             # go to project
     
@@ -174,4 +174,4 @@ if __name__ == '__main__':
     # aes = oe.audio_entities()
     # ae = aes[0]
     # print(ae.get_df(), ae.get_origin())
-    do_overlay(oes[0], oes[5])
+    # do_overlay(oes[0], oes[5])
