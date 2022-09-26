@@ -1,9 +1,10 @@
 import os
-from go_to import *
-from env import *
+import pandas as pd
 from pydub import AudioSegment
 from pydub.playback import play
-import pandas as pd
+
+from go_to import *
+from env import *
 
 class AudioEntity:
     def __init__(self, foa:str, _class:str, time_start:int, time_end:int, entity_num:int) -> None:

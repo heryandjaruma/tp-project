@@ -27,6 +27,11 @@ class OvEntity:
         self.csv_filename = csv_filename
         self.foa = self.csv_filename[:-4]+r'.wav'
 
+        self.fold = self.csv_filename[:5]
+        self.room = self.csv_filename[6:11]
+        self.mix = self.csv_filename[12:18]
+        self.ov = self.csv_filename[19:22]
+
         self.set_pandas_metadata()        # read metadata
         self.set_audio_entitites()        # creating audio entities
     
