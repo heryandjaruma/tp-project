@@ -5,6 +5,7 @@ from pydub.playback import play
 
 from go_to import *
 from env import *
+from filename_rule import export_particle_audio
 
 class AudioEntity:
     def __init__(self, foa:str, _class:str, time_start:int, time_end:int, entity_num:int) -> None:
@@ -19,8 +20,7 @@ class AudioEntity:
         self.time_start = time_start
         self.time_end = time_end
         self.entity_num = entity_num
-        # self.naming = "_".join([self.fold,self.room,self.mix,'%03d' % int(self.time_start), '%03d' % int(entity_num + 1)]) + '.wav'
-        self.naming = "_".join([self.fold,self.room,self.mix,'class%02d' % int(entity_num + 1)]) + '.wav'
+        self.naming = export_particle_audio(self.fold, self.room, self.mix, entity_num)
         self.set_pandas_metadata()
     
     def get_origin(self):
@@ -48,7 +48,6 @@ class AudioEntity:
     
     def set_pandas_metadata(self):
         go_to_metadata_dir()
-        # self.df = pd.read_csv(self.origin[:-3]+'csv', header=None,index_col=0)
         self.df = pd.read_csv(self.origin[:-3]+'csv', header=None)
         self.df.columns = ['Frm', 'Class', 'Track', 'Azmth', 'Elev']
         self.df = self.df.set_index('Frm')

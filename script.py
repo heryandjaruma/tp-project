@@ -1,3 +1,4 @@
+from multiprocessing import allow_connection_pickling
 import os
 import numpy as np
 import pandas as pd
@@ -7,7 +8,7 @@ from pydub.playback import play
 
 from env import *
 from go_to import *
-from filename_rule import *
+from filename_rule import export_history, export_overlapped_audio, export_overlapped_csv
 from classes.OvEntity import OvEntity
 
 
@@ -24,11 +25,12 @@ def get_all_files_in_metadata_dev(first_fold_number:int, last_fold_number:int):
             returned_list_list.append(returned_list)
         else:
             print(Fore.RED, 'fold', item, 'does not exist... try checking your file', Fore.WHITE)
+            last_fold_number = last_fold_number-1
         
     go_to_project_dir()                             # go to project
-    return returned_list_list
+    return returned_list_list, last_fold_number
 
-def init_all_objects(list_of_files: list[list], export_audio_entities = True):
+def init_all_objects(list_of_files: list[list], export_audio = True):
     # go_to_metadata_dir()                            # go to metadata
     main_object_list = []
     for outer_item in list_of_files:
@@ -40,6 +42,7 @@ def init_all_objects(list_of_files: list[list], export_audio_entities = True):
         main_object_list.append(object_list)
     return main_object_list
 
+
 # * PERMUTATION INDEXING is used to do permutation of folder name (1-5)
 def get_permutation_indexing(first_fold_number:int, last_fold_number:int):
     listed = list(range(first_fold_number,last_fold_number+1))
@@ -48,6 +51,7 @@ def get_permutation_indexing(first_fold_number:int, last_fold_number:int):
     combination = np.unique(combination, axis = 0)
     combination = [item for item in combination if item[0] != item[1]]
     return combination
+
 
 def get_combination_folder_indexing(list_of_object1:list, list_of_object2:list):
     return np.array(np.meshgrid(list_of_object1, list_of_object2)).T.reshape(-1,2)
@@ -72,8 +76,6 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
 
     for object_indexing in permutation_indexing:
 
-        # combination = np.array(np.meshgrid(object_indexing[0], object_indexing[1])).T.reshape(-1,2)
-        # combination = np.array(np.meshgrid(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])).T.reshape(-1,2)
         combination_indexing = get_combination_folder_indexing(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])
 
         print('This process will combine mixes in this manner:')
@@ -94,7 +96,6 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
             # print(i, item[0].get_csv_filename(), item[1].get_csv_filename())
             do_overlay(item[0], item[1])
             print('')
-        # do_overlay(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])
 
 
 
@@ -146,6 +147,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 
+
             # OE2
             # ##########################################################################
             particle_df = oe2_ae.get_df()   # get oe2's df
@@ -179,6 +181,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 
+
             # algorithm to overlap audio in csv
             # ##########################################################################
             df1 = df_ori_main
@@ -208,6 +211,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 
+
+
+
             # EXPORT CSV
             # ##########################################################################
             # csv_name_export = oe1.get_csv_filename().replace('ov1', 'ov2_%03d_%03d' % (increment_original, increment_particle))
@@ -217,6 +223,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             go_to_project_dir()
             print('\tOverlapped csv exported as', Fore.LIGHTMAGENTA_EX, csv_name_export, Fore.WHITE)
             # ##########################################################################
+
+
+
 
 
 
@@ -234,6 +243,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 
+
+
+
             # ADD HISTORY to dataframe
             # ##########################################################################
             row_history = np.array([
@@ -242,6 +254,10 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             history_df = pd.DataFrame(row_history.reshape(1,-1))
             history = pd.concat([history, history_df])            # append to df
             # ##########################################################################
+
+
+
+
 
 
 
@@ -268,7 +284,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 
-    # Notify process is done
+
+
+    # Notify the process is done
     # ##########################################################################
     print('History exported', Fore.LIGHTMAGENTA_EX, history_name_export, Fore.WHITE)        
     # ##########################################################################
@@ -301,17 +319,15 @@ def check_all_objects(oe_array):
 # TODO: main
 if __name__ == '__main__':
     folder_start = 1
-    folder_end = 2
+    folder_end = 10
 
+    # read all files
     all_files = get_all_files_in_metadata_dev(folder_start, folder_end)
 
-    # for i in all_files:
-    #     print(i)
+    # init object from all files
+    all_objects = init_all_objects(all_files[0], export_audio=False)
 
-    all_objects = init_all_objects(all_files, export_audio_entities = False)
-
-    # for i in all_objects:
-    #     print(i)
-    overlay_all_objects(all_objects, folder_start, folder_end)
+    # overlay audio with the desired algorithm
+    overlay_all_objects(all_objects, folder_start, all_files[1])
 
     print('\nProgram exiting...')

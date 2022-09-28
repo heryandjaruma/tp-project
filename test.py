@@ -1,11 +1,10 @@
+import os
 
-import numpy as np
+from go_to import go_to_metadata_dir, go_to_project_dir
 
-listed = list(range(1,6))
-combi = np.array(np.meshgrid(listed, listed)).T.reshape(-1,2)
-combi = np.sort(combi)
-combi = np.unique(combi, axis = 0)
-remove = np.array([listed, listed]).T.reshape(-1,2)
-combi = [item for item in combi if item[0] != item[1]]
-for i, item in enumerate(combi):
-    print(i, item)
+go_to_metadata_dir()
+for i in range(0,6):
+    name = 'fold3_room1_mix' + '%03d' % i + '_ov1.csv'
+    f = open(name, 'w')
+    f.close()
+go_to_project_dir()
