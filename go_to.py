@@ -1,5 +1,6 @@
 import os
-from env import *
+
+path_to_project_fold = r'D:\TPProject\init_main'
 
 def go_to_project_dir():
     os.path.dirname(path_to_project_fold)

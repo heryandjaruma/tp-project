@@ -6,7 +6,6 @@ from colorama import Fore
 from pydub import AudioSegment
 from pydub.playback import play
 
-from env import *
 from go_to import *
 from filename_rule import export_history, export_overlapped_audio, export_overlapped_csv
 from classes.OvEntity import OvEntity
@@ -190,6 +189,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             df1['unique_id'] = np.arange(0, df1.shape[0]*2,2)
             df2['unique_id'] = np.arange(1, df2.shape[0]*2,2)
             
+            # determine which entity is longer
             if ae1_duration < ae2_duration:
                 df2['Frm'] = df1['Frm']
                 particle_audio = particle_audio[:ae1_duration*100]

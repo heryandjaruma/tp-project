@@ -4,7 +4,6 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 from go_to import *
-from env import *
 from filename_rule import export_particle_audio
 
 class AudioEntity:

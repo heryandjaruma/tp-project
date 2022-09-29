@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 from classes.AudioEntity import AudioEntity
-from env import *
 from go_to import *
 
 dict = [
