@@ -60,39 +60,42 @@ def get_combination_folder_indexing(list_of_object1:list, list_of_object2:list):
     return np.array(np.meshgrid(list_of_object1, list_of_object2)).T.reshape(-1,2)
 
 
-def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_fold_number:int):
+def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_fold_number:int, skip_confirm=True):
 
     permutation_indexing = get_permutation_indexing(first_fold_number, last_fold_number)
     
-    print('This process will combine folder in this manner:')
-    for item in permutation_indexing:
-        print(item)
+    if not skip_confirm:
+        print('This process will combine folder in this manner:')
+        for item in permutation_indexing:
+            print(item)
 
-    while True:
-        confirm_folder = input('Execute now?[y/n]')
-        if confirm_folder=='y':
-            break
-        elif confirm_folder=='n':
-            return
-        else:
-            continue
+        while True:
+            confirm_folder = input('Execute now?[y/n]')
+            if confirm_folder=='y':
+                break
+            elif confirm_folder=='n':
+                return
+            else:
+                continue
 
     for object_indexing in permutation_indexing:
 
         combination_indexing = get_combination_folder_indexing(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])
 
-        print('This process will combine mixes in this manner:')
-        for item_arr in combination_indexing:
-            print(f'\t{item_arr[0].get_foa()} -- {item_arr[1].get_foa()}')
 
-        while True:
-            confirm_mix = input('Execute now?[y/n]')
-            if confirm_mix=='y':
-                break
-            elif confirm_mix=='n':
-                return
-            else:
-                continue
+        if not skip_confirm:
+            print('This process will combine mixes in this manner:')
+            for item_arr in combination_indexing:
+                print(f'\t{item_arr[0].get_foa()} -- {item_arr[1].get_foa()}')
+
+            while True:
+                confirm_mix = input('Execute now?[y/n]')
+                if confirm_mix=='y':
+                    break
+                elif confirm_mix=='n':
+                    return
+                else:
+                    continue
 
 
         for i, item in enumerate(combination_indexing):
@@ -393,7 +396,7 @@ def export_audio_entities(oe:OvEntity, skip_confirm=False):
 # TODO: main
 if __name__ == '__main__':
     folder_start = 1
-    folder_end = 2
+    folder_end = 6
 
     clear_screen()
     # read all files

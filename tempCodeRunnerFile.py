@@ -1,1 +1,2 @@
-combine[0][0]
+
+            confirm_folder = input('Execute now?[y/n]')
