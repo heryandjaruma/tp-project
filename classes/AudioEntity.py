@@ -19,7 +19,7 @@ class AudioEntity:
         self.time_start = time_start
         self.time_end = time_end
         self.entity_num = entity_num
-        self.naming = export_particle_audio(self.fold, self.room, self.mix, entity_num)
+        self.naming = export_particle_audio(self.fold, self.room, self.mix, self.ov, self._class)
         self.set_pandas_metadata()
     
     def get_origin(self):

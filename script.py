@@ -11,6 +11,9 @@ from filename_rule import export_history, export_overlapped_audio, export_overla
 from classes.OvEntity import OvEntity
 
 
+def clear_screen():
+    os.system('cls||clear')
+
 # TODO: will get all files in the given range implicitly
 def get_all_files_in_metadata_dev(first_fold_number:int, last_fold_number:int):
     go_to_metadata_dir()
@@ -28,15 +31,17 @@ def get_all_files_in_metadata_dev(first_fold_number:int, last_fold_number:int):
     go_to_project_dir()                             # go to project
     return returned_list_list, last_fold_number
 
-def init_all_objects(list_of_files: list[list], export_audio = True):
+def init_all_objects(list_of_files: list[list], export_audio = True, skip_confirm=False):
     # go_to_metadata_dir()                            # go to metadata
     main_object_list = []
     for outer_item in list_of_files:
         object_list = []
         for inner_item in outer_item:
             object_list.append(OvEntity(inner_item))
-            if export_audio:
-                export_audio_entities(object_list[-1])
+
+            if export_audio:        # ! if export_audio is true
+                export_audio_entities(object_list[-1], skip_confirm)
+
         main_object_list.append(object_list)
     return main_object_list
 
@@ -93,6 +98,7 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
         for i, item in enumerate(combination_indexing):
             # print(i, item[0].get_csv_filename(), item[1].get_csv_filename())
             do_overlay(item[0], item[1])
+            
             print('')
 
 
@@ -195,7 +201,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
                 particle_audio_df2 = particle_audio_df2[:ae1_duration*100]
                 
                 # ! create name for particle df2
-                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class())
+                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class(), increment)
 
                 go_to_wav_tunggal_cut()    
                 particle_audio_df2.export(particle_cut_name_df2)    # ! export the particle df2 into wav_tunggal_cut
@@ -212,7 +218,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
                 particle_audio_df1 = particle_audio_df1[0]
 
                 # ! create name for particle df1
-                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class())
+                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class(), increment)
                 go_to_wav_tunggal_cut()
                 particle_audio_df1.export(particle_cut_name_df1)    # ! export the particle df1 into wav_tunggal_cut
                 go_to_project_dir()
@@ -234,7 +240,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
                 particle_audio_df1 = particle_audio_df1[:ae2_duration*100]
 
                 # ! create name for particle df1
-                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class())
+                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class(), increment)
 
                 go_to_wav_tunggal_cut()
                 particle_audio_df1.export(particle_cut_name_df1)    # ! export the particle df1 into wav_tunggal_cut
@@ -251,7 +257,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
                 particle_audio_df2 = particle_audio_df2[0]
 
                 # ! create name for particle df2
-                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class())
+                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class(), increment)
                 go_to_wav_tunggal_cut()
                 particle_audio_df2.export(particle_cut_name_df2)    # ! export the particle df2 into wav_tunggal_cut
                 go_to_project_dir()
@@ -323,7 +329,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             # ADD HISTORY to dataframe
             # ##########################################################################
             row_history = np.array([
-                oe1.get_foa(), oe2.get_foa(), oe1_ae.get__class(), oe2_ae.get__class(), csv_name_export
+                oe1.get_foa(), oe2.get_foa(), oe1_ae.get__class(), oe2_ae.get__class(), audio_name_export, particle_cut_name_df1, particle_cut_name_df2, particle_overlap_name_export
             ])
             history_df = pd.DataFrame(row_history.reshape(1,-1))
             history = pd.concat([history, history_df])            # append to df
@@ -365,16 +371,21 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 
 # TODO: export all Audio Entities in a specified Ov Entity
-def export_audio_entities(oe:OvEntity):
-    print(f'Total of {oe.get_count_entities()} audio entities will be exported\nProceed?[y/n]')
-    confirm = input().lower()
-    if confirm == 'y':
+def export_audio_entities(oe:OvEntity, skip_confirm=False):
+    if not skip_confirm:
+        print(f'Total of {oe.get_count_entities()} audio entities will be exported\nProceed?[y/n]')
+        confirm = input().lower()
+        if confirm == 'y':
+            for ae in oe.audio_entities():
+                ae.export_self()
+        else:
+            print('Export cancelled...')
+            pass
+        print('')
+    else:
         for ae in oe.audio_entities():
             ae.export_self()
-    else:
-        print('Export cancelled...')
-        pass
-    print('')
+
 
 
 
@@ -384,12 +395,12 @@ if __name__ == '__main__':
     folder_start = 1
     folder_end = 2
 
-    os.system('cls||clear')
+    clear_screen()
     # read all files
     all_files = get_all_files_in_metadata_dev(folder_start, folder_end)
 
     # init object from all files
-    all_objects = init_all_objects(all_files[0], export_audio=False)
+    all_objects = init_all_objects(all_files[0], export_audio=True, skip_confirm=True)
 
     # overlay audio with the desired algorithm
     overlay_all_objects(all_objects, folder_start, all_files[1])

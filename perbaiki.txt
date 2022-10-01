@@ -4,4 +4,4 @@ fold room mix , boleh tambah keteragan kelas
 output jadi -.
  f1 r 1 mixi
  f1 r 1 mixi _ 12 kelas tunggal
- f1 r 1 mixi _5_ 12 kelas tunggal 35
+ f1 r 1 mixi _5_ 12 kelas tunggal 3 5

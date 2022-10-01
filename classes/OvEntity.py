@@ -70,6 +70,8 @@ class OvEntity:
         return self.count_entities
     def audio_entities(self):
         return self.AudioEntities
+
+
     def set_audio_entitites(self):
         # TODO: process ov entity into audio entities
         self.count_entities = 0     # ! to count how many entities AE has
@@ -77,30 +79,64 @@ class OvEntity:
 
 
         # check if there's duplicate class
-        existed_class = list()
+        existed_class = set()
 
         first_row = self.df.iloc[0]
         time_start = time_end = first_row['Frm']
         class_before = first_row['Class']
+        # print(class_before)
 
 
 
         for index, row in self.df.iterrows():
-            if class_before == row['Class']:
+            if row['Class'] == class_before:
+                # ! if the row has the same class before, which mean the audio is still running, then continue to the next row
                 time_end = row['Frm']
+                # existed_class[-1] = class_before
+                # existed_class.append(class_before)
                 continue
             else:
-                self.AudioEntities.append(AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities))
+                
+                # ! create the entity first
+                new_entity = AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities)
+                # print(existed_class)
 
-                # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
+                # ! before append to the main list, check the availibility of the newly created entity on the existed_class
+                if new_entity.get__class() not in existed_class:
+                    # existed_class.add(class_before)
+                    self.AudioEntities.append(new_entity)
+                    existed_class.add(new_entity.get__class())
+                    self.count_entities = self.count_entities + 1
+
+                    # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
                 time_start = time_end = row['Frm']
                 class_before = row['Class']
-                self.count_entities = self.count_entities + 1
-                
 
-        # final class append
-        self.AudioEntities.append(AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities))
-        # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
+        
+
+
+        new_entity = AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities)
+        # ! before append to the main list, check the availibility on the existed_class
+        if new_entity.get__class() not in existed_class:
+            self.AudioEntities.append(new_entity)
+            existed_class.add(new_entity.get__class())
+            self.count_entities = self.count_entities + 1
+
+            # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
         time_start = time_end = row['Frm']
         class_before = row['Class']
-        self.count_entities = self.count_entities + 1
+
+
+        # print("ALL Entities")
+        # for i in self.audio_entities():
+        #     print(i.get__class())
+
+
+
+
+        # # final class append
+        # self.AudioEntities.append(AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities))
+        # # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
+        # time_start = time_end = row['Frm']
+        # class_before = row['Class']
+        # self.count_entities = self.count_entities + 1
