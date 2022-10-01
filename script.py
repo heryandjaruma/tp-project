@@ -7,9 +7,8 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 from go_to import *
-from filename_rule import export_history, export_overlapped_audio, export_overlapped_csv
+from filename_rule import export_history, export_overlapped_audio, export_overlapped_csv, export_particle_label_only, export_particle_label_overlap
 from classes.OvEntity import OvEntity
-
 
 
 # TODO: will get all files in the given range implicitly
@@ -36,7 +35,7 @@ def init_all_objects(list_of_files: list[list], export_audio = True):
         object_list = []
         for inner_item in outer_item:
             object_list.append(OvEntity(inner_item))
-            if export_audio_entities:
+            if export_audio:
                 export_audio_entities(object_list[-1])
         main_object_list.append(object_list)
     return main_object_list
@@ -78,8 +77,8 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
         combination_indexing = get_combination_folder_indexing(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])
 
         print('This process will combine mixes in this manner:')
-        for item in combination_indexing:
-            print(item)
+        for item_arr in combination_indexing:
+            print(f'\t{item_arr[0].get_foa()} -- {item_arr[1].get_foa()}')
 
         while True:
             confirm_mix = input('Execute now?[y/n]')
@@ -109,11 +108,8 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
     print('Now processing', Fore.LIGHTMAGENTA_EX, oe1.get_csv_filename(), Fore.WHITE , 'with', Fore.LIGHTMAGENTA_EX, oe2.get_csv_filename(), Fore.WHITE)
     print(f'There will be {oe1.get_count_entities()*oe2.get_count_entities()} possible combinations.\nStart processing...')
 
-    # loop for each oe1_aes
-    file_count_process = 1
 
-    increment_original = 1          # increment for original_audio loop
-
+    increment = 1
     for oe1_ae in oe1_aes:
 
 
@@ -133,14 +129,13 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
         # ##########################################################################
 
 
-        increment_particle = 1      # increment for particle_audio loop
 
 
         for iter_num, oe2_ae in enumerate(oe2_aes):
 
             # Notify the running process
             # ##########################################################################
-            print(Fore.GREEN, f"Processing #{file_count_process} entity...", Fore.WHITE)
+            print(Fore.GREEN, f"Processing #{increment} entity...", Fore.WHITE)
             print('\tCombining class', Fore.LIGHTYELLOW_EX, oe1_ae.get__class(), 'of', oe1.get_foa(), Fore.WHITE, 'with class', Fore.LIGHTYELLOW_EX, oe2_ae.get__class(), 'of', oe2.get_foa(), Fore.WHITE)
             # ##########################################################################
 
@@ -151,10 +146,10 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             # ##########################################################################
             particle_df = oe2_ae.get_df()   # get oe2's df
             go_to_audio_entities_dev()      # go to audio entities
-            particle_audio = AudioSegment.from_file(oe2_ae.get_naming())   # get oe2's particle audio
+            particle_audio_df2 = AudioSegment.from_file(oe2_ae.get_naming())   # get oe2's particle audio
             go_to_project_dir()
-            particle_audio = particle_audio.split_to_mono()
-            particle_audio = particle_audio[0]
+            particle_audio_df2 = particle_audio_df2.split_to_mono()
+            particle_audio_df2 = particle_audio_df2[0]
 
             # get start, end, duration for ae2
             ae2_start = oe2_ae.get_time_start()
@@ -183,6 +178,8 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
             # algorithm to overlap audio in csv
             # ##########################################################################
+            pd.set_option('display.max_rows', None)
+
             df1 = df_ori_main
             df2 = particle_df
 
@@ -191,14 +188,81 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             
             # determine which entity is longer
             if ae1_duration < ae2_duration:
+                # ! entity df2 is longer, so df2 duration will be cut according to ae1 duration
                 df2['Frm'] = df1['Frm']
-                particle_audio = particle_audio[:ae1_duration*100]
+                
+                # ! then export the particle_cut into wav_tunggal_cut folder
+                particle_audio_df2 = particle_audio_df2[:ae1_duration*100]
+                
+                # ! create name for particle df2
+                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class())
+
+                go_to_wav_tunggal_cut()    
+                particle_audio_df2.export(particle_cut_name_df2)    # ! export the particle df2 into wav_tunggal_cut
+                go_to_project_dir()
+
+
+
+
+                # ! re-export particle df1 with proper filename
+                # ? the particle actually can just be copied from audio_entities_dev, but we choose to re-export for easy naming and moving file
+                go_to_audio_entities_dev()
+                particle_audio_df1 = AudioSegment.from_file(oe1_ae.get_naming())
+                particle_audio_df1 = particle_audio_df1.split_to_mono()
+                particle_audio_df1 = particle_audio_df1[0]
+
+                # ! create name for particle df1
+                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class())
+                go_to_wav_tunggal_cut()
+                particle_audio_df1.export(particle_cut_name_df1)    # ! export the particle df1 into wav_tunggal_cut
+                go_to_project_dir()
+
+
+
             else:
+                # ! entity df1 is longer, so df1 frame will be copied into df2 frame, but the duration will be cut to match df2
                 df2['Frm'] = df1['Frm'].iloc[:ae1_duration]
 
+                # ! retreive the df1 audio again for cut version
+                go_to_audio_entities_dev()      # go to audio entities
+                particle_audio_df1 = AudioSegment.from_file(oe1_ae.get_naming())   # get oe2's particle audio
+                go_to_project_dir()
+                particle_audio_df1 = particle_audio_df1.split_to_mono()
+                particle_audio_df1 = particle_audio_df1[0]
+
+                # ! then cut df1 audio with the length of df2 audio
+                particle_audio_df1 = particle_audio_df1[:ae2_duration*100]
+
+                # ! create name for particle df1
+                particle_cut_name_df1 = export_particle_label_only(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class())
+
+                go_to_wav_tunggal_cut()
+                particle_audio_df1.export(particle_cut_name_df1)    # ! export the particle df1 into wav_tunggal_cut
+                go_to_project_dir()
+
+
+
+
+                # ! re-export particle df2 with proper filename
+                # ? the particle actually can just be copied from audio_entities_dev, but we choose to re-export for easy naming and moving file
+                go_to_audio_entities_dev()
+                particle_audio_df2 = AudioSegment.from_file(oe2_ae.get_naming())
+                particle_audio_df2 = particle_audio_df2.split_to_mono()
+                particle_audio_df2 = particle_audio_df2[0]
+
+                # ! create name for particle df2
+                particle_cut_name_df2 = export_particle_label_only(oe2_ae.get_fold(), oe2_ae.get_room(), oe2_ae.get_mix(), oe2_ae.get__class())
+                go_to_wav_tunggal_cut()
+                particle_audio_df2.export(particle_cut_name_df2)    # ! export the particle df2 into wav_tunggal_cut
+                go_to_project_dir()
+
+
+            # ! process to merge the df
             new_df = pd.concat([df1,df2])
             new_df = new_df.sort_values(by=['unique_id'])
             new_df = new_df.drop(columns='unique_id')
+            # ! in case of df2 is longer, then the dropna will take effect
+            # ! in case of df1 is longer, then dropna will take NO effect
             new_df = new_df.dropna()
             new_df['Frm'] = new_df['Frm'].astype(int)
             new_df = new_df.set_index('Frm')
@@ -206,18 +270,29 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             df_combined = pd.concat([df_combined, new_df])
             df_combined = pd.concat([df_combined, df_ori_left])
 
-            ori_df = ori_df.reset_index()            # reset index as int, not 'Frm' column
+            ori_df = ori_df.reset_index()            # ! reset index as int, not 'Frm' column
             # ##########################################################################
 
 
 
+
+            # EXPORT WAV_TUNGGAL_CUT_MERGE
+            # ##########################################################################
+            particle_overlap = particle_audio_df1.overlay(particle_audio_df2)       # ! overlay particle df1 and df2
+            go_to_project_dir()
+
+            # ! then overlap the audio which both now has the same length
+            particle_overlap_name_export = export_particle_label_overlap(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class(), oe2_ae.get__class())
+            go_to_mix_wav_tunggal_cut_overlap()
+            particle_overlap.export(particle_overlap_name_export)
+            go_to_project_dir()
+            # ##########################################################################
 
 
 
             # EXPORT CSV
             # ##########################################################################
-            # csv_name_export = oe1.get_csv_filename().replace('ov1', 'ov2_%03d_%03d' % (increment_original, increment_particle))
-            csv_name_export = export_overlapped_csv(oe1, oe2, increment_original, increment_particle)
+            csv_name_export = export_overlapped_csv(oe1, increment)
             go_to_metadata_dir()
             df_combined.to_csv(csv_name_export, header=False)
             go_to_project_dir()
@@ -231,10 +306,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
             # EXPORT AUDIO
             # ##########################################################################
-            overlayed = original_audio.overlay(particle_audio, position=ae1_start*100)
+            overlayed = original_audio.overlay(particle_audio_df2, position=ae1_start*100)
             go_to_mix_dev()
-            # audio_name_export = "_".join([oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), 'ov2', '%03d_%03d' % (increment_original, increment_particle)]) + '.wav'
-            audio_name_export = export_overlapped_audio(oe1_ae, oe2_ae, increment_original, increment_particle)
+            audio_name_export = export_overlapped_audio(oe1_ae, increment)
             overlayed.export(audio_name_export)
             print('\tOverlapped audio exported as', Fore.LIGHTBLUE_EX, audio_name_export, Fore.WHITE)
             go_to_project_dir()
@@ -249,7 +323,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             # ADD HISTORY to dataframe
             # ##########################################################################
             row_history = np.array([
-                oe1.get_csv_filename(), oe2.get_csv_filename(), oe1_ae.get__class(), oe2_ae.get__class(), csv_name_export
+                oe1.get_foa(), oe2.get_foa(), oe1_ae.get__class(), oe2_ae.get__class(), csv_name_export
             ])
             history_df = pd.DataFrame(row_history.reshape(1,-1))
             history = pd.concat([history, history_df])            # append to df
@@ -263,10 +337,8 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
             # increment for each vars
             # ##########################################################################
-            increment_particle = increment_particle + 1
-            file_count_process = file_count_process + 1
+            increment = increment + 1
             # ##########################################################################
-        increment_original = increment_original + 1
         # ##########################################################################
     
 
@@ -277,7 +349,7 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
     oe2_filename = oe2.get_csv_filename()
     # history_name_export = oe1_filename[:-4] + '_OVERLAP_' + oe2_filename[:-4] + '.csv'
     history_name_export = export_history(oe1_filename, oe2_filename)
-    got_to_history_dev()
+    go_to_history_dev()
     history.to_csv(history_name_export, header=False, index=False)
     go_to_project_dir()
     # ##########################################################################
@@ -305,22 +377,14 @@ def export_audio_entities(oe:OvEntity):
     print('')
 
 
-# TODO: check Ov Entity array
-def check_all_objects(oe_array):
-    for ov in oe_array:
-        print(f'  {ov.get_csv_filename()}')
-        print('==================================')
-        for ae in ov.audio_entities():
-            print(f'    {ae.get_naming()}')
-        print(f' [classes: {ov.get_count_entities()}]\n')
-
 
 
 # TODO: main
 if __name__ == '__main__':
     folder_start = 1
-    folder_end = 10
+    folder_end = 2
 
+    os.system('cls||clear')
     # read all files
     all_files = get_all_files_in_metadata_dev(folder_start, folder_end)
 

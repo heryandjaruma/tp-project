@@ -1,8 +1,9 @@
 import os
-from go_to import go_to_metadata_dir, go_to_mix_dev
+from go_to import go_to_metadata_dir, go_to_mix_dev, go_to_history_dev
 
 # go_to_mix_dev()
 # go_to_metadata_dir()
+go_to_history_dev()
 
 files = os.listdir()
 for f in files:

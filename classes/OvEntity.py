@@ -72,12 +72,18 @@ class OvEntity:
         return self.AudioEntities
     def set_audio_entitites(self):
         # TODO: process ov entity into audio entities
-        self.count_entities = 0
-        self.AudioEntities = []
+        self.count_entities = 0     # ! to count how many entities AE has
+        self.AudioEntities = []     # ! list for AE
+
+
+        # check if there's duplicate class
+        existed_class = list()
 
         first_row = self.df.iloc[0]
         time_start = time_end = first_row['Frm']
         class_before = first_row['Class']
+
+
 
         for index, row in self.df.iterrows():
             if class_before == row['Class']:
@@ -85,10 +91,12 @@ class OvEntity:
                 continue
             else:
                 self.AudioEntities.append(AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities))
+
                 # print(f'{dict[class_before]}--time_start:{time_start} until time_end:{time_end} with duration:{(time_end-time_start)/10}s')
                 time_start = time_end = row['Frm']
                 class_before = row['Class']
                 self.count_entities = self.count_entities + 1
+                
 
         # final class append
         self.AudioEntities.append(AudioEntity(self.foa,class_before,time_start,time_end,self.count_entities))
