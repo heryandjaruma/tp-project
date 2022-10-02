@@ -15,7 +15,7 @@ def export_particle_audio(fold, room, mix, ov, _class):
     return "_".join([str(fold), str(room), str(mix), str(ov),str(_class)]) + '.wav'
 
 def export_particle_label_only(fold, room, mix, _class, increment):  #! export wav_tunggal_cut
-    return "_".join([str(fold), str(room), str(mix), str(_class), '%03d' % (increment)]) + '.wav'
+    return "_".join([str(fold), str(room), str(mix), str(_class), '%05d' % (increment)]) + '.wav'
 
 def export_particle_label_overlap(fold, room, mix, _class1, _class2, increment):    #! export mix_wav_tunggal_cut
-    return "_".join([str(fold), str(room), str(mix),str(_class1), str(_class2), '%03d' % (increment)]) + '.wav'
+    return "_".join([str(fold), str(room), str(mix),str(_class1), str(_class2), '%05d' % (increment)]) + '.wav'

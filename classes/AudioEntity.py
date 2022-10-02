@@ -22,7 +22,7 @@ class AudioEntity:
         self.naming = export_particle_audio(self.fold, self.room, self.mix, self.ov, self._class)
         self.set_pandas_metadata()
 
-        self.used_cut = 1
+        # self.used_cut = 1
     
     def get_origin(self):
         return self.origin
@@ -92,7 +92,7 @@ class AudioEntity:
         play(self.entity)
         go_to_project_dir()
     
-    def export_cut_self(self, duration:int):
+    def export_cut_self(self, duration:int, universal_counter):
         go_to_audio_entities_dev()      # go to audio entities
         particle_audio = AudioSegment.from_file(self.get_naming())   # get oe2's particle audio
         go_to_project_dir()
@@ -100,12 +100,13 @@ class AudioEntity:
         particle_audio = particle_audio[0]
         self.particle_audio_cut = particle_audio[:duration*100]
 
-        particle_cut_name = export_particle_label_only(self.get_fold(), self.get_room(), self.get_mix(), self.get__class(), self.get_used_cut())
+        particle_cut_name = export_particle_label_only(self.get_fold(), self.get_room(), self.get_mix(), self.get__class(), universal_counter)
         go_to_wav_tunggal_cut()    
         particle_audio.export(particle_cut_name)    # ! export the particle into wav_tunggal_cut
         go_to_project_dir()
 
-        self.used_cut = self.used_cut + 1       # ! increment how many times this wav_tunggal is used
+        # self.used_cut = self.used_cut + 1       # ! increment how many times this wav_tunggal is used
+        # universal_counter = universal_counter + 1
 
         return particle_cut_name
     
@@ -115,5 +116,5 @@ class AudioEntity:
     def get_export(self):
         return self.entity
 
-    def get_used_cut(self):
-        return self.used_cut
+    # def get_used_cut(self):
+    #     return self.used_cut

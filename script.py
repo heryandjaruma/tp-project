@@ -9,6 +9,66 @@ from go_to import *
 from filename_rule import export_history, export_overlapped_audio, export_overlapped_csv, export_particle_label_only, export_particle_label_overlap
 from classes.OvEntity import OvEntity
 
+
+
+def get_counter(foldname):
+    if foldname == 'fold1':
+        return universal_counter_fold1
+    if foldname == 'fold2':
+        return universal_counter_fold2
+    if foldname == 'fold3':
+        return universal_counter_fold3
+    if foldname == 'fold4':
+        return universal_counter_fold4
+    if foldname == 'fold5':
+        return universal_counter_fold5
+    if foldname == 'fold6':
+        return universal_counter_fold6
+
+def increase_counter(foldname):
+    if foldname == 'fold1':
+        universal_counter_fold1 = universal_counter_fold1 + 1
+    if foldname == 'fold2':
+        universal_counter_fold2 = universal_counter_fold2 + 1
+    if foldname == 'fold3':
+        universal_counter_fold3 = universal_counter_fold3 + 1
+    if foldname == 'fold4':
+        universal_counter_fold4 = universal_counter_fold4 + 1
+    if foldname == 'fold5':
+        universal_counter_fold5 = universal_counter_fold5 + 1
+    if foldname == 'fold6':
+        universal_counter_fold6 = universal_counter_fold6 + 1
+        
+
+
+def get_mix_counter(foldname):
+    if foldname == 'fold1':
+        return universal_counter_mix_fold1
+    if foldname == 'fold2':
+        return universal_counter_mix_fold2
+    if foldname == 'fold3':
+        return universal_counter_mix_fold3
+    if foldname == 'fold4':
+        return universal_counter_mix_fold4
+    if foldname == 'fold5':
+        return universal_counter_mix_fold5
+    if foldname == 'fold6':
+        return universal_counter_mix_fold6
+
+def increase_mix_counter(foldname):
+    if foldname == 'fold1':
+        universal_counter_mix_fold1 = universal_counter_mix_fold1 + 1
+    if foldname == 'fold2':
+        universal_counter_mix_fold2 = universal_counter_mix_fold2 + 1
+    if foldname == 'fold3':
+        universal_counter_mix_fold3 = universal_counter_mix_fold3 + 1
+    if foldname == 'fold4':
+        universal_counter_mix_fold4 = universal_counter_mix_fold4 + 1
+    if foldname == 'fold5':
+        universal_counter_mix_fold5 = universal_counter_mix_fold5 + 1
+    if foldname == 'fold6':
+        universal_counter_mix_fold6 = universal_counter_mix_fold6 + 1
+
 # TODO: clear screen
 def clear_screen():
     os.system('cls||clear')
@@ -187,18 +247,22 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
                 df2['Frm'] = df1['Frm']
 
                 #TODO: export cut version of df2
-                particle2_name = oe2_ae.export_cut_self(ae1_duration)
+                particle2_name = oe2_ae.export_cut_self(ae1_duration, get_counter(oe2_ae.get_fold()))
+                increase_counter(oe2_ae.get_fold())
                 #TODO: export original df1
-                particle1_name = oe1_ae.export_cut_self(ae1_duration)
+                particle1_name = oe1_ae.export_cut_self(ae1_duration, get_counter(oe1_ae.get_fold()))
+                increase_counter(oe1_ae.get_fold())
 
             else:
                 # ! entity df1 is longer, so df1 frame will be copied into df2 frame, but the duration will be cut to match df2
                 df2['Frm'] = df1['Frm'].iloc[:ae1_duration]
 
                 #TODO: export cut version of df1
-                particle1_name = oe1_ae.export_cut_self(ae2_duration)
+                particle1_name = oe1_ae.export_cut_self(ae2_duration, get_counter(oe1_ae.get_fold()))
+                increase_counter(oe1_ae.get_fold())
                 #TODO: export original of df2
-                particle2_name = oe2_ae.export_cut_self(ae2_duration)
+                particle2_name = oe2_ae.export_cut_self(ae2_duration, get_counter(oe2_ae.get_fold()))
+                increase_counter(oe2_ae.get_fold())
 
             # ! process to merge the df
             new_df = pd.concat([df1,df2])
@@ -219,10 +283,13 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             overlap = oe1_ae.get_export_cut()
             overlap = overlap.overlay(oe2_ae.get_export_cut())
 
-            increment_overlap = get_increment_number_label_overlap(oe1.get_fold())
+            
+
+            mix_increment = get_mix_counter(oe1.get_fold())
 
             # ! then overlap the audio which both now has the same length
-            particle_overlap_name_export = export_particle_label_overlap(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class(), oe2_ae.get__class(), increment_overlap)
+            particle_overlap_name_export = export_particle_label_overlap(oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), oe1_ae.get__class(), oe2_ae.get__class(), mix_increment)
+            increase_mix_counter(oe1.get_fold())
             go_to_mix_wav_tunggal_cut_overlap()
             overlap.export(particle_overlap_name_export)
             go_to_project_dir()
@@ -263,8 +330,34 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
 # TODO: main
 if __name__ == '__main__':
+    global universal_counter_fold1
+    universal_counter_fold1 = 1
+    global universal_counter_fold2
+    universal_counter_fold2 = 1
+    global universal_counter_fold3
+    universal_counter_fold3 = 1
+    global universal_counter_fold4
+    universal_counter_fold4 = 1
+    global universal_counter_fold5
+    universal_counter_fold5 = 1
+    global universal_counter_fold6
+    universal_counter_fold6 = 1
+
+    global universal_counter_mix_fold1
+    universal_counter_mix_fold1 = 1
+    global universal_counter_mix_fold2
+    universal_counter_mix_fold2 = 1
+    global universal_counter_mix_fold3
+    universal_counter_mix_fold3 = 1
+    global universal_counter_mix_fold4
+    universal_counter_mix_fold4 = 1
+    global universal_counter_mix_fold5
+    universal_counter_mix_fold5 = 1
+    global universal_counter_mix_fold6
+    universal_counter_mix_fold6 = 1
+    
     folder_start = 1
-    folder_end = 2
+    folder_end = 3
 
     clear_screen()
 
