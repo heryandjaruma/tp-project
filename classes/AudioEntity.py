@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 from go_to import *
-from filename_rule import export_particle_audio
+from filename_rule import export_particle_audio, export_particle_label_only
 
 class AudioEntity:
     def __init__(self, foa:str, _class:str, time_start:int, time_end:int, entity_num:int) -> None:
@@ -21,6 +21,8 @@ class AudioEntity:
         self.entity_num = entity_num
         self.naming = export_particle_audio(self.fold, self.room, self.mix, self.ov, self._class)
         self.set_pandas_metadata()
+
+        self.used_cut = 1
     
     def get_origin(self):
         return self.origin
@@ -69,6 +71,7 @@ class AudioEntity:
         self.sample_width = self.entity.sample_width
         self.set_channels = 2
         # print(f'time_start:{self.time_start} | time_end:{self.time_end}')
+        
         go_to_project_dir()
     
     def export_self(self):
@@ -88,3 +91,29 @@ class AudioEntity:
         go_to_audio_entities_dev()
         play(self.entity)
         go_to_project_dir()
+    
+    def export_cut_self(self, duration:int):
+        go_to_audio_entities_dev()      # go to audio entities
+        particle_audio = AudioSegment.from_file(self.get_naming())   # get oe2's particle audio
+        go_to_project_dir()
+        particle_audio = particle_audio.split_to_mono()
+        particle_audio = particle_audio[0]
+        self.particle_audio_cut = particle_audio[:duration*100]
+
+        particle_cut_name = export_particle_label_only(self.get_fold(), self.get_room(), self.get_mix(), self.get__class(), self.get_used_cut())
+        go_to_wav_tunggal_cut()    
+        particle_audio.export(particle_cut_name)    # ! export the particle into wav_tunggal_cut
+        go_to_project_dir()
+
+        self.used_cut = self.used_cut + 1       # ! increment how many times this wav_tunggal is used
+
+        return particle_cut_name
+    
+    def get_export_cut(self):
+        return self.particle_audio_cut
+
+    def get_export(self):
+        return self.entity
+
+    def get_used_cut(self):
+        return self.used_cut
