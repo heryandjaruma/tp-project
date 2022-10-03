@@ -75,7 +75,7 @@ def get_combination_folder_indexing(list_of_object1:list, list_of_object2:list):
 # TODO: overlapping all objects according to folder permutation and object combination
 def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_fold_number:int, skip_confirm=True):
     permutation_indexing = get_permutation_indexing(first_fold_number, last_fold_number)
-    
+
     # if not skip_confirm:
     print('\nThis process will combine folder in this manner:')
     for item in permutation_indexing:
@@ -91,7 +91,7 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
             continue
 
     for object_indexing in permutation_indexing:
-        combination_indexing = get_combination_folder_indexing(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1]) 
+        combination_indexing = get_combination_folder_indexing(list_of_list_object[object_indexing[0]-1], list_of_list_object[object_indexing[1]-1])
 
         if not skip_confirm:
             print('This process will combine mixes in this manner:')
@@ -108,7 +108,7 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
                     continue
 
         for item in combination_indexing:
-            do_overlay(item[0], item[1])            
+            do_overlay(item[0], item[1])
             print('')
 
 def get_increment_number_label_only(folder_number:int):
@@ -248,19 +248,19 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             history = pd.concat([history, history_df])                  # append to df
 
             increment = increment + 1                                   # increment of #entity
-    
+
     # EXPORT HISTORY
     history_name_export = export_history(oe1.get_csv_filename(), oe2.get_csv_filename())
     go_to_history_dev()
     history.to_csv(history_name_export, header=False, index=False)
     go_to_project_dir()
 
-    print('History exported', Fore.LIGHTMAGENTA_EX, history_name_export, Fore.WHITE)        
+    print('History exported', Fore.LIGHTMAGENTA_EX, history_name_export, Fore.WHITE)
 
 # TODO: main
 if __name__ == '__main__':
     folder_start = 1
-    folder_end = 3
+    folder_end = 6
 
     clear_screen()
 
