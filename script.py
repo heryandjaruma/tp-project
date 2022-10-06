@@ -74,6 +74,10 @@ def get_combination_folder_indexing(list_of_object1:list, list_of_object2:list):
 
 # TODO: overlapping all objects according to folder permutation and object combination
 def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_fold_number:int, skip_confirm=True):
+
+    each_folder_count = [1,1,1,1,1,1]
+    # fold1, fold2, fold3, fold4, fold5, fold6
+
     permutation_indexing = get_permutation_indexing(first_fold_number, last_fold_number)
 
     # if not skip_confirm:
@@ -108,8 +112,10 @@ def overlay_all_objects(list_of_list_object: list, first_fold_number:int, last_f
                     continue
 
         for item in combination_indexing:
-            do_overlay(item[0], item[1])
+            do_overlay(item[0], item[1], each_folder_count)
             print('')
+
+
 
 def get_increment_number_label_only(folder_number:int):
     go_to_wav_tunggal_cut()
@@ -128,7 +134,7 @@ def get_increment_number_label_overlap(folder_number:int):
     return countfiles
 
 # TODO: do the overlap main algorithm
-def do_overlay(oe1:OvEntity, oe2:OvEntity):
+def do_overlay(oe1:OvEntity, oe2:OvEntity, each_fold_count:list):
     history = pd.DataFrame()
 
     oe1_aes = oe1.audio_entities()
@@ -224,7 +230,8 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             go_to_project_dir()
 
             # EXPORT CSV
-            csv_name_export = export_overlapped_csv(oe1, oe1.get_counter())
+            # csv_name_export = export_overlapped_csv(oe1, oe1.get_counter())
+            csv_name_export = export_overlapped_csv(oe1, get_count(each_fold_count, oe1.get_fold()))
             go_to_metadata_dir()
             df_combined.to_csv(csv_name_export, header=False)
             go_to_project_dir()
@@ -232,9 +239,9 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
 
             # EXPORT AUDIO
             overlayed = original_audio.overlay(particle_audio_df2, position=ae1_start*100)
-            audio_name_export = export_overlapped_audio(oe1_ae, oe1.get_counter())
+            # audio_name_export = export_overlapped_audio(oe1_ae, oe1.get_counter())
+            audio_name_export = export_overlapped_audio(oe1_ae, get_count(each_fold_count, oe1_ae.get_fold()))
             oe1.increase_counter()
-
             go_to_mix_dev()
             overlayed.export(audio_name_export)
             go_to_project_dir()
@@ -247,6 +254,8 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
             history_df = pd.DataFrame(row_history.reshape(1,-1))
             history = pd.concat([history, history_df])                  # append to df
 
+            increase_count(each_fold_count, oe1.get_fold())
+
             increment = increment + 1                                   # increment of #entity
 
     # EXPORT HISTORY
@@ -256,6 +265,38 @@ def do_overlay(oe1:OvEntity, oe2:OvEntity):
     go_to_project_dir()
 
     print('History exported', Fore.LIGHTMAGENTA_EX, history_name_export, Fore.WHITE)
+
+def get_count(fold_count_list:list, fold_num:str):
+    if fold_num == 'fold1':
+        return fold_count_list[0]
+    elif fold_num == 'fold2':
+        return fold_count_list[1]
+    elif fold_num == 'fold3':
+        return fold_count_list[2]
+    elif fold_num == 'fold4':
+        return fold_count_list[3]
+    elif fold_num == 'fold5':
+        return fold_count_list[4]
+    elif fold_num == 'fold6':
+        return fold_count_list[5]
+    else:
+        return -1
+
+def increase_count(fold_count_list:list, fold_num:str):
+    if fold_num == 'fold1':
+        fold_count_list[0] += 1
+    elif fold_num == 'fold2':
+        fold_count_list[1] += 1
+    elif fold_num == 'fold3':
+        fold_count_list[2] += 1
+    elif fold_num == 'fold4':
+        fold_count_list[3] += 1
+    elif fold_num == 'fold5':
+        fold_count_list[4] += 1
+    elif fold_num == 'fold6':
+        fold_count_list[5] += 1
+    else:
+        return -1
 
 # TODO: main
 if __name__ == '__main__':

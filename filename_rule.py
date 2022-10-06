@@ -1,8 +1,12 @@
+# def export_overlapped_audio(oe1_ae, increment):                                                                     #! export to mix_dev
+#     return "_".join([oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), 'ov2', '%03d' % (increment)]) + '.wav'
 def export_overlapped_audio(oe1_ae, increment):                                                                     #! export to mix_dev
-    return "_".join([oe1_ae.get_fold(), oe1_ae.get_room(), oe1_ae.get_mix(), 'ov2', '%03d' % (increment)]) + '.wav'
+    return "_".join([oe1_ae.get_fold(), oe1_ae.get_room(), 'mix%03d' % (increment), 'ov2']) + '.wav'
 
 def export_overlapped_csv(oe1, increment):                                                                          #! export to metadata_dev
-    return "_".join([oe1.get_fold(), oe1.get_room(), oe1.get_mix(), 'ov2', '%03d' % (increment)]) + '.csv'
+    return "_".join([oe1.get_fold(), oe1.get_room(), 'mix%03d' % (increment), 'ov2']) + '.csv'
+# def export_overlapped_csv(oe1, increment):                                                                          #! export to metadata_dev
+#     return "_".join([oe1.get_fold(), oe1.get_room(), oe1.get_mix(), 'ov2', '%03d' % (increment)]) + '.csv'
 
 def export_history(oe1_filename, oe2_filename):                                                                     #! export to history_dev
     return oe1_filename[:-4] + '_OVERLAP_' + oe2_filename[:-4] + '.csv'
